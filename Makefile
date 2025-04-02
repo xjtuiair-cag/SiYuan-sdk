@@ -8,8 +8,6 @@ PATH     := $(DEST)/bin:$(PATH)
 NR_CORES := $(shell nproc)
 
 # default configure flags
-fesvr-co              = --prefix=$(RISCV) --target=riscv64-unknown-linux-gnu
-isa-sim-co            = --prefix=$(RISCV) --with-fesvr=$(DEST)
 gnu-toolchain-co-fast = --prefix=$(RISCV) --disable-gdb# no multilib for fast
 pk-co                 = --prefix=$(RISCV) --host=riscv64-unknown-linux-gnu-elf CC=riscv64-unknown-linux-gnu-gcc OBJDUMP=riscv64-unknown-linux-gnu-objdump
 tests-co              = --prefix=$(RISCV)/target
@@ -40,31 +38,6 @@ gnu-toolchain-no-multilib: install-dir
 	mkdir -p riscv-gnu-toolchain/build
 	cd riscv-gnu-toolchain/build;\
 	../configure $(gnu-toolchain-co-fast);\
-	cd $(ROOT)
-
-fesvr: install-dir $(RISCV)/bin/riscv64-unknown-linux-gnu-gcc
-	mkdir -p riscv-fesvr/build
-	cd riscv-fesvr/build;\
-	../configure $(fesvr-co);\
-	make $(fesvr-mk);\
-	make install;\
-	cd $(ROOT)
-
-isa-sim: install-dir $(RISCV)/bin/riscv64-unknown-linux-gnu-gcc fesvr
-	mkdir -p riscv-isa-sim/build
-	cd riscv-isa-sim/build;\
-	../configure $(isa-sim-co);\
-	make $(isa-sim-mk);\
-	make install;\
-	cd $(ROOT)
-
-tests: install-dir $(RISCV)/bin/riscv64-unknown-linux-gnu-gcc
-	mkdir -p riscv-tests/build
-	cd riscv-tests/build;\
-	autoconf;\
-	../configure $(tests-co);\
-	make $(tests-mk);\
-	make install;\
 	cd $(ROOT)
 
 pk: install-dir $(RISCV)/bin/riscv64-unknown-linux-gnu-gcc
