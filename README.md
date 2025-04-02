@@ -1,12 +1,10 @@
-# Ariane SDK
+# SiYuan SDK
+This repository is originally from cva6-sdk, we add some new features to it.
 
-This repository houses a set of RISCV tools for the [ariane core](https://github.com/pulp-platform/ariane). It contains some small modifications to the official [riscv-tools](https://github.com/riscv/riscv-tools). Most importantly it **does not contain openOCD**.
+This repository houses a set of RISCV tools.
 
 Included tools:
-* [Spike](https://github.com/riscv/riscv-isa-sim/), the ISA simulator
-* [riscv-tests](https://github.com/riscv/riscv-tests/), a battery of ISA-level tests
 * [riscv-pk](https://github.com/riscv/riscv-pk/), which contains `bbl`, a boot loader for Linux and similar OS kernels, and `pk`, a proxy kernel that services system calls for a target-machine application by forwarding them to the host machine
-* [riscv-fesvr](https://github.com/riscv/riscv-fesvr/), the host side of a simulation tether that services system calls on behalf of a target machine
 * [riscv-gnu-toolchain](https://github.com/riscv/riscv-gnu-toolchain), the cross compilation toolchain for riscv targets
 
 ## Quickstart
@@ -40,7 +38,7 @@ $ export PATH=$PATH:$RISCV/bin
 ```
 
 ## Linux
-You can also build a compatible linux image with bbl that boots linux on the ariane fpga mapping:
+You can also build a compatible linux image with bbl that boots linux:
 ```bash
 $ make vmlinux # make only the vmlinux image
 # outputs a vmlinux file in the top directory
@@ -49,7 +47,7 @@ $ make bbl.bin # generate the entire bootable image
 ```
 
 ### Booting from an SD card
-The bootloader of ariane requires a GPT partition table so you first have to create one with gdisk.
+The bootloader requires a GPT partition table so you first have to create one with gdisk.
 
 ```bash
 $ sudo fdisk -l # search for the corresponding disk label (e.g. /dev/sdb)
@@ -66,13 +64,23 @@ Then the bbl+linux kernel image can get copied to the sd card with `dd`. __Caref
 $ sudo dd if=bbl.bin of=/dev/sdb1 status=progress oflag=sync bs=1M
 ```
 
-## OpenOCD - Optional
-If you really need and want to debug on an FPGA/ASIC target the installation instructions are [here](https://github.com/riscv/riscv-openocd). 
+# Coremark
+We use coremark to measure the performance of single core of SiYuan. When you successfully boot linux, you will see a executable file named `coremark.riscv`. Please use `./coremark.riscv` to run it, and you will get the result like this:
 
-## Ethernet SSH
-This patch incorporates an overlay to overcome the painful delay in generating public/private key pairs on the target
-(which happens every time because the root filing system is volatile). Do not use these keys on more than one device.
-Likewise it also incorporates a script (rootfs/etc/init.d/S40fixup) which replaces the MAC address with a valid Digilent
-value. This should be replaced by the unique value on the back of the Genesys2 board if more than one device is used on
-the same VLAN. Needless to say both of these values would need regenerating for anything other than development use.
-
+```bash
+#./coremark.riscv
+2K Performance run parameters for coremark.
+CoreMark Size: 666
+Total ticks: 15557
+Iterations/Sec: 33 
+Total time (secs): 15
+Compiler version: GCC8.2.0
+Compiler flags: -O2 -static
+Memory location: Please put data memory location here (e.g., code in flash, data on heap etc)
+seedcrc: 0xe9f5
+[0]crclist: 0xe714
+[0]crcmatrix: 0xfd7
+[0]crcstate: 0x85a3
+[0]crcfinal: 0x2555
+```
+The clock frequency of SiYuan is 50M, and SiYuan run 33 iterations/sec, so the performance of SiYuan is 33/50=0.66 coremark/M.
