@@ -50,17 +50,19 @@ pk: install-dir $(RISCV)/bin/riscv64-unknown-linux-gnu-gcc
 
 all: gnu-toolchain-libc fesvr isa-sim tests pk
 
-# benchmark for the cache subsystem
-cachetest:
-	cd ./cachetest/ && $(RISCV)/bin/riscv64-unknown-linux-gnu-gcc cachetest.c -o cachetest.elf
-	cp ./cachetest/cachetest.elf rootfs/
-
+HelloWorld:
+	cd ./Hello_world/ && $(RISCV)/bin/riscv64-unknown-linux-gnu-gcc hello_world.c -o hello_world.elf -lpthread
+	cp ./Hello_world/hello_world.elf rootfs/
+rootfs/2048:
+	cp ./game/2048/2048.elf rootfs/
 # cool command-line tetris
 rootfs/tetris:
 	cd ./vitetris/ && make clean && ./configure CC=riscv64-unknown-linux-gnu-gcc && make
 	cp ./vitetris/tetris $@
-
-vmlinux: $(buildroot_defconfig) $(linux_defconfig) $(busybox_defconfig) $(RISCV)/bin/riscv64-unknown-elf-gcc $(RISCV)/bin/riscv64-unknown-linux-gnu-gcc cachetest rootfs/tetris
+rootfs/coremark:
+	cd ./coremark/ && ./build-coremark
+	cp ./coremark/coremark.riscv ./rootfs/coremark.riscv
+vmlinux: $(buildroot_defconfig) $(linux_defconfig) $(busybox_defconfig) $(RISCV)/bin/riscv64-unknown-elf-gcc $(RISCV)/bin/riscv64-unknown-linux-gnu-gcc HelloWorld rootfs/2048 rootfs/tetris rootfs/coremark
 	mkdir -p build
 	make -C buildroot defconfig BR2_DEFCONFIG=../$(buildroot_defconfig)
 	make -C buildroot
@@ -83,9 +85,9 @@ bbl.bin: bbl
 	riscv64-unknown-elf-objcopy -S -O binary --change-addresses -0x80000000 $< $@
 
 clean-all: clean
-	rm -rf riscv-fesvr/build riscv-isa-sim/build riscv-gnu-toolchain/build riscv-tests/build riscv-pk/build
+	rm -rf riscv-gnu-toolchain/build riscv-pk/build
 
-.PHONY: cachetest rootfs/tetris
+.PHONY: rootfs/tetris rootfs/coremark rootfs/2048
 
 help:
 	@echo "usage: $(MAKE) [RISCV='<install/here>'] [tool/img] ..."
