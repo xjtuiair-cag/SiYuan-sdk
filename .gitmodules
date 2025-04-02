@@ -9,6 +9,9 @@
 [submodule "buildroot"]
 	path = buildroot
 	url = git://git.buildroot.net/buildroot
-[submodule "vitetris"]
-	path = vitetris
+[submodule "game/vitetris"]
+	path = game/vitetris
 	url = https://github.com/pulp-platform/vitetris.git
+[submodule "coremark"]
+	path = coremark
+	url = https://github.com/2002liush/riscv-coremark.git
