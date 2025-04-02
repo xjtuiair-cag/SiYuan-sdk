@@ -1,7 +1,7 @@
 # Makefile for RISC-V toolchain; run 'make help' for usage.
 
 ROOT     := $(patsubst %/,%, $(dir $(abspath $(lastword $(MAKEFILE_LIST)))))
-RISCV    ?= $(PWD)/install
+RISCV    ?= $(ROOT)/install
 DEST     := $(abspath $(RISCV))
 PATH     := $(DEST)/bin:$(PATH)
 
@@ -48,7 +48,7 @@ pk: install-dir $(RISCV)/bin/riscv64-unknown-linux-gnu-gcc
 	make install;\
 	cd $(ROOT)
 
-all: gnu-toolchain-libc fesvr isa-sim tests pk
+all: gnu-toolchain-libc 
 
 HelloWorld:
 	cd ./Hello_world/ && $(RISCV)/bin/riscv64-unknown-linux-gnu-gcc hello_world.c -o hello_world.elf -lpthread
@@ -57,12 +57,12 @@ rootfs/2048:
 	cp ./game/2048/2048.elf rootfs/
 # cool command-line tetris
 rootfs/tetris:
-	cd ./vitetris/ && make clean && ./configure CC=riscv64-unknown-linux-gnu-gcc && make
-	cp ./vitetris/tetris $@
+	cd ./game/vitetris/ && make clean && ./configure CC=riscv64-unknown-linux-gnu-gcc && make
+	cp ./game/vitetris/tetris $@
 rootfs/coremark:
-	cd ./coremark/ && ./build-coremark
+	cd ./coremark/ && ./build-coremark.sh
 	cp ./coremark/coremark.riscv ./rootfs/coremark.riscv
-vmlinux: $(buildroot_defconfig) $(linux_defconfig) $(busybox_defconfig) $(RISCV)/bin/riscv64-unknown-elf-gcc $(RISCV)/bin/riscv64-unknown-linux-gnu-gcc HelloWorld rootfs/2048 rootfs/tetris rootfs/coremark
+vmlinux: $(buildroot_defconfig) $(linux_defconfig) $(busybox_defconfig) $(RISCV)/bin/riscv64-unknown-linux-gnu-gcc HelloWorld rootfs/2048 rootfs/tetris rootfs/coremark
 	mkdir -p build
 	make -C buildroot defconfig BR2_DEFCONFIG=../$(buildroot_defconfig)
 	make -C buildroot
